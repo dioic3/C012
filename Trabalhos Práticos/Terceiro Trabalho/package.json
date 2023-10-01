@@ -1,0 +1,11 @@
+{
+  "name": "terceiro-trabalho",
+  "version": "1.0.0",
+  "description": "Trabalho usando a linguagem JavaScript para criar um simulador com algoritmos de Scheduling de CPU.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
