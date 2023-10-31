@@ -1,50 +1,49 @@
 import threading
-import time
 
-# Variável compartilhada
-contador = 0
+# Variável compartilhada para representar o número de clientes na fila
+numero_clientes_na_fila = 0
 
-# Função que representa uma seção crítica sem controle
-def secao_critica_sem_controle():
-    global contador
-    temp = contador
-    time.sleep(1)  # Simula uma operação demorada
-    contador = temp + 1
+# Função que representa uma seção crítica SEM controle
+def cliente_chega_sem_controle():
+    global numero_clientes_na_fila
+    numero_clientes_na_fila += 1
+    print(f"Cliente chegou na fila (SEM controle). Número de clientes na fila: {numero_clientes_na_fila}")
 
-# Função que representa uma seção crítica com controle usando semáforo
-def secao_critica_com_controle(sem):
-    global contador
-    sem.acquire()
-    temp = contador
-    time.sleep(1)  # Simula uma operação demorada
-    contador = temp + 1
-    sem.release()
+# Função que representa uma seção crítica COM controle
+def cliente_chega_com_controle():
+    global numero_clientes_na_fila
+    with controle_acesso:
+        numero_clientes_na_fila += 1
+        print(f"Cliente chegou na fila (COM controle). Número de clientes na fila: {numero_clientes_na_fila}")
 
-# Função para execução da versão sem controle
-def sem_controle():
-    for _ in range(5):
-        secao_critica_sem_controle()
-        print("Sem controle - Contador:", contador)
+# Criação de um Lock para controlar o acesso à seção crítica
+controle_acesso = threading.Lock()
 
-# Função para execução da versão com controle usando semáforo
-def com_controle(sem):
-    for _ in range(5):
-        secao_critica_com_controle(sem)
-        print("Com controle - Contador:", contador)
+# Criação de threads para clientes chegando SEM controle
+threads_sem_controle = []
+for _ in range(5):
+    t = threading.Thread(target=cliente_chega_sem_controle)
+    threads_sem_controle.append(t)
 
-# Criação de um semáforo com um contador inicial de 1
-sem = threading.Semaphore(1)
+# Criação de threads para clientes chegando COM controle
+threads_com_controle = []
+for _ in range(5):
+    t = threading.Thread(target=cliente_chega_com_controle)
+    threads_com_controle.append(t)
 
-# Criação de threads para ambas as versões
-t1 = threading.Thread(target=sem_controle)
-t2 = threading.Thread(target=com_controle, args=(sem,))
+# Inicia as threads para clientes chegando SEM controle
+for t in threads_sem_controle:
+    t.start()
 
-# Inicia as threads
-t1.start()
-t2.start()
+# Inicia as threads para clientes chegando COM controle
+for t in threads_com_controle:
+    t.start()
 
-# Aguarda até que ambas as threads terminem
-t1.join()
-t2.join()
+# Aguarda até que todas as threads terminem
+for t in threads_sem_controle:
+    t.join()
 
-print("Final do programa")
+for t in threads_com_controle:
+    t.join()
+
+print("Fim do programa")
